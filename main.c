@@ -25,9 +25,10 @@ typedef struct {
 } location;
 
 int main(int argc, char* argv[]) {
-	int rank, size, n=4, k=3, num=0, i, blockcounts[1], total_wrecks, found_wrecks=0;
+	int rank, size, n=4, k=3, num=0, i, blockcounts[1], total_wrecks, found_wrecks=0, sep_index;
 	location* locs;
 	location* rec;
+	char buf[BUFF_SIZE];
 	MPI_Datatype locationtype, oldtypes[1];
 	MPI_Aint offsets[1];
 	
@@ -36,7 +37,8 @@ int main(int argc, char* argv[]) {
 	MPI_Comm_rank( MPI_COMM_WORLD, &rank );
 	MPI_Comm_size( MPI_COMM_WORLD, &size );
 
-	n=size;
+	n = atoi(argv[1]);
+	k = atoi(argv[2]);
 	offsets[0] = 0;
 	blockcounts[0] = 2;
 	oldtypes[0] = MPI_INT;
@@ -52,23 +54,22 @@ int main(int argc, char* argv[]) {
 	srand(getpid());
 	if(rank == 0) {
 		FILE* file;
-//		if( (fd = TEMP_FAILURE_RETRY(open(argv[3], O_RDONLY))) == -1) {
-//			ERR("open");
-//		}
+		file = fopen(argv[3], "r");
 
-//		if(TEMP_FAILURE_RETRY(close(fd)) < 0) {
-//			ERR("close");
-//		}
-//		while(fgets(buf, BUFF_SIZE, file[0]) != NULL) {
-//			sep_index = (int) (strchr(buf, COORDS_SEPARATOR) - buf);
-//			printf("Found %c on %d\n", COORDS_SEPARATOR, sep_index);
-//		}
-		for(i = 0; i < n*k; i++) {
-			locs[i].x = rand() % 10;
-			locs[i].y = rand() % 10;
-
-			printf("(%d, %d)\n", locs[i].x, locs[i].y);
+		i = 0;
+		while(fgets(buf, BUFF_SIZE, file) != NULL) {
+			
+			sep_index = (int) (strchr(buf, COORDS_SEPARATOR) - buf);
+			printf("(%d, %d)\n", atoi(buf), atoi(buf + sep_index + 1));
+			locs[i++].x = atoi(buf);
+			locs[i].y = atoi(buf + sep_index + 1);
 		}
+
+		fclose(file);
+//		for(i = 0; i < n*k; i++) {
+//			locs[i].x = rand() % 10;
+//			locs[i].y = rand() % 10;
+//		}
 	}
 
 	if(rank == 0) {

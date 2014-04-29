@@ -5,7 +5,7 @@ TARGET=prlab3
 FILES=main.o
 SOURCE=main.c
 HOSTFILE=hosts
-N=6
+N=4
 K=3
 MAP_FILE=./mapa
 

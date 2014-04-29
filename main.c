@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
 	MPI_Comm_size( MPI_COMM_WORLD, &size );
 
 	n=size;
-	offsets[1] = 0;
+	offsets[0] = 0;
 	blockcounts[0] = 2;
 	oldtypes[0] = MPI_INT;
 	MPI_Type_struct(1, blockcounts, offsets, oldtypes, &locationtype);

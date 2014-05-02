@@ -61,8 +61,8 @@ int main(int argc, char* argv[]) {
 			
 			sep_index = (int) (strchr(buf, COORDS_SEPARATOR) - buf);
 			printf("(%d, %d)\n", atoi(buf), atoi(buf + sep_index + 1));
-			locs[i++].x = atoi(buf);
-			locs[i].y = atoi(buf + sep_index + 1);
+			locs[i].x = atoi(buf);
+			locs[i++].y = atoi(buf + sep_index + 1);
 		}
 
 		fclose(file);

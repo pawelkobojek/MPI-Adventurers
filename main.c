@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
 	n = atoi(argv[1]);
 	k = atoi(argv[2]);
 
-	/* Register type */
+	/* Rejestracja typu */
 	offsets[0] = 0;
 	blockcounts[0] = 2;
 	oldtypes[0] = MPI_INT;

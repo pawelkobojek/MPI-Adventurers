@@ -12,7 +12,7 @@
                      perror(source),kill(0,SIGKILL),\
                          exit(EXIT_FAILURE))
 
-#define MAX_SLEEP 2
+#define MAX_SLEEP 4
 #define MIN_SLEEP 1
 
 #define BUFF_SIZE 32

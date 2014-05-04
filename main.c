@@ -39,20 +39,26 @@ int main(int argc, char* argv[]) {
 
 	n = atoi(argv[1]);
 	k = atoi(argv[2]);
+
+	/* Register type */
 	offsets[0] = 0;
 	blockcounts[0] = 2;
 	oldtypes[0] = MPI_INT;
 	MPI_Type_struct(1, blockcounts, offsets, oldtypes, &locationtype);
 	MPI_Type_commit(&locationtype);
+
 	if( (rec = (location*) calloc(k, sizeof(location))) == NULL) {
 		ERR("calloc");
 	}
 
-	if( (locs = (location*) calloc(n * k, sizeof(location))) == NULL) {
-		ERR("calloc");
-	}
+	/* Ustawianie seeda na pid */
 	srand(getpid());
+
 	if(rank == 0) {
+		if( (locs = (location*) calloc(n * k, sizeof(location))) == NULL) {
+			ERR("calloc");
+		}
+		/* Czytanie mapy z pliku */
 		FILE* file;
 		file = fopen(argv[3], "r");
 
@@ -66,20 +72,12 @@ int main(int argc, char* argv[]) {
 		}
 
 		fclose(file);
-//		for(i = 0; i < n*k; i++) {
-//			locs[i].x = rand() % 10;
-//			locs[i].y = rand() % 10;
-//		}
 	}
 
-	if(rank == 0) {
-		printf("before scatter\n");
-	}
+	/* Roze¶lij lokacje do procesów */
 	MPI_Scatter(locs, k, locationtype, rec, k, locationtype, 0, MPI_COMM_WORLD);
-	if(rank == 0) {
-		printf("after scatter\n");
-	}
 
+	/* Przetwarzanie swoich lokacji */
 	for(i = 0; i < k; i++) {
 		printf("Poszukiwacz#%d: sprawdzam (%d, %d)...\n", rank, rec[i].x, rec[i].y);
 		sleep(rand() % (MAX_SLEEP - MIN_SLEEP) + MIN_SLEEP);
@@ -94,12 +92,15 @@ int main(int argc, char* argv[]) {
 		
 	}
 	
+	/* Zbieranie informacji o ilosci znalezionych wraków */
 	MPI_Reduce(&found_wrecks, &total_wrecks, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 	
 	MPI_Gather(rec, k, locationtype, locs, k, locationtype, 0, MPI_COMM_WORLD);
 
-	/* Following barrier for the sake of clarity - it can be commented out */
+	/* Poni¿sza bariera jest u¿yta tylko do lepszego wypisywania - mo¿na zakomentowaæ */
 	MPI_Barrier(MPI_COMM_WORLD);
+	
+	/* Proces dowódcy wypisuje znalezione wraki */
 	if( rank == 0) {
 		printf("Znaleziono wrakÃ³w: %d\n", total_wrecks);
 		for(i = 0; i < n*k; i++) {
@@ -109,9 +110,12 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
+	/* Zwolnienei typu i zaalokowanej pamieci */
 	MPI_Type_free(&locationtype);	
 	free(rec);
-	free(locs);
+	if(rank == 0) {
+		free(locs);
+	}
 	MPI_Finalize();
 	return 0;
 }
